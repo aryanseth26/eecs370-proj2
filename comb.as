@@ -16,13 +16,52 @@ fn      noop    Start of the fn comb(n,r)
         add     5       6       5       // increment stack pointer
         sw      5       2       stack   // save r input on the stack
         add     5       6       5       // increment stack pointer
+        sw      5       4       stack   // save r4 local var on the stack
+        add     5       6       5       // increment stack pointer
         noop   ////////////////////////////////////////////////////////////
         noop
+        noop   //  Base Cases (r == 0), (n == r) return 1
+        beq     2       0       return1
+        beq     1       2       return1
+        noop   //  Make a call to comb(n - 1, r)
+        lw      0       6       neg1
+        add     1       6       1
+        lw      0       4       fnAddr
+        jalr    4       7
+        noop   // Decrement r
+        lw      0       6       neg1
+        add     2       6       2
+        noop   // Save intermediate result on the stack
+        sw      5       3       stack
+        lw      0       6       pos1
+        add     5       6       5
+        noop   // Make second fn call comb(n - 1, r - 1)
+        jalr    4       7
+        noop   // Restore intermediate result on stack into r4
+        lw      0       6       neg1
+        add     5       6       5
+        lw      5       4       stack   
+        noop   // Add results together and put it in r3, then restore registers
+        add     4       3       3
+        beq     0       0       restore
+return1 noop   // Returning the result of 1
+        lw      0       6       pos1
+        add     0       6       3
+        beq     0       0       restore
+restore noop   // Restoring all callee saved registers
+        lw      0       6       neg1
+        add     5       6       5       // decrement stack pointer
+        lw      5       4       stack   // restore r4 local var
+        add     5       6       5       // decrement stack pointer
+        lw      5       2       stack   // restore r input
+        add     5       6       5       // decrement stack pointer
+        lw      5       1       stack   // restore n input
+        add     5       6       5       // decrement stack pointer
+        lw      5       7       stack   // restore r7 return address
+        noop   // Jump back to the return address, ignore PC + 1 stored in r6
+        jalr    7       6               
         noop
-
-
-
-
+        noop
 nIn     .fill   1
 rIn     .fill   1
 fnAddr  .fill   fn
